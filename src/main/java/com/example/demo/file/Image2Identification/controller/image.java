@@ -1,16 +1,16 @@
-package com.example.demo.controller;
+package com.example.demo.file.Image2Identification.controller;
 
+import com.example.demo.common.ApiResponse.AjaxResult;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -22,8 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@RequestMapping("/Image2Identification")
 @RestController
 public class image {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+
+
 
     public static void main(String[] args) throws Exception {
         // 解析读取二维码
@@ -100,8 +106,8 @@ public class image {
      */
     //
     @PostMapping("/upload_test")
-    public Map upLoad_test( @RequestPart("photo") MultipartFile photo) throws IOException {
-        System.out.println("start");
+    public AjaxResult upLoad_test(@RequestPart("photo") MultipartFile photo) throws IOException {
+
         String fileName = null;
 
         if(!photo.isEmpty()){
@@ -134,16 +140,25 @@ public class image {
             try{
                 Result result = new MultiFormatReader().decode(image);
                 String info = result.getText();
-                System.out.println(info);
+
+                log.info(info);
+
+//                System.out.println(info);
                 if(info==null || "".equals(info)){
-                    System.out.println("没有二维码信息");
+                    log.info("没有二维码信息");
+                    return AjaxResult.error("没有二维码信息");
                 }else if(info.contains("weixin")){  //qq mp
-                    System.out.println("有微信二维码，不允许");
+                    log.info("有微信二维码，不允许");
+                    return AjaxResult.error("有微信二维码，不允许");
                 }else{
-                    System.out.println("有二维，可以使用");
+                    log.info("有二维，可以使用");
+                    Map map = new HashMap();
+                    map.put("identi",info);
+                    return AjaxResult.success(map);
                 }
             }catch(Exception e){
-                System.out.println("图像中没有二维码");
+                log.info("图像中没有二维码");
+                return AjaxResult.error("图像中没有二维码");
             }
         }
 
@@ -157,10 +172,8 @@ public class image {
 //
 //        //重定向到照片展示页面
 //        return "redirect:/";
-        System.out.println("end");
-        Map map=new HashMap<>();
-        map.put("code",200);
-        return map;
+
+        return AjaxResult.error();
     }
 
 
