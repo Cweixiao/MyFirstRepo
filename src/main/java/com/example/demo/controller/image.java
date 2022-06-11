@@ -91,6 +91,7 @@ public class image {
 
 
     /**
+     * 二维码和条形码
      * Combine the two methods above
      * http://localhost:8088/upload_test
      * @param photo
